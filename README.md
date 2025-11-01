@@ -1,181 +1,141 @@
+🛒 **Yanki E-Commerce ETL Project**
 
-````markdown
-# 🛒 Yanki E-Commerce ETL Project
-
-## 📘 Overview
-The **Yanki E-Commerce ETL Project** demonstrates a complete **Extract, Transform, Load (ETL)** workflow using a simulated online retail dataset.  
-The goal is to clean, normalize, and structure raw transactional data into relational tables suitable for analysis, reporting, or database storage.
-
-This project applies **data engineering principles** such as schema design, data cleaning, and data transformation, and produces multiple normalized tables connected via primary and foreign keys.
+📘 **Overview**
+The Yanki E-Commerce ETL Project showcases a complete Extract, Transform, and Load (ETL) process using an online retail dataset.
+The goal of this project was to take unstructured sales data and convert it into clean, normalized tables that can easily be used for analysis or database storage.
+It follows proper data engineering steps — cleaning, transformation, normalization, and data export — all implemented in Python with Pandas.
 
 ---
 
-## 🧠 Objectives
-- Extract raw e-commerce data from CSV files  
-- Transform the data by cleaning, type conversion, and normalization  
-- Load the cleaned data into separate structured tables  
-- Build an ER (Entity-Relationship) diagram to visualize table relationships  
+⚙️ **Project Objectives**
+
+* Extract data from the raw CSV file.
+* Transform the data by cleaning and standardizing formats.
+* Normalize and organize it into relational tables.
+* Load the cleaned data into structured CSV files.
+* Create an ER diagram showing table relationships.
 
 ---
 
-## 📊 ER Diagram
+🏗️ **Data Model (ER Diagram)**
+The data model shows how the e-commerce tables relate to one another.
+Each **customer** can place multiple **orders**, each **order** contains multiple **products**, and every order is linked to a **payment method** and **shipping address**.
 
-![Data Model](Data_Model.png)
+The final tables created are:
 
-### Relationships
-- Each **Customer** can place multiple **Orders**  
-- Each **Order** can include multiple **Products**  
-- Each **Order** has one **Payment Method**  
-- Each **Customer** has one **Shipping Address**
+1. Customers table — stores customer details like name, email, and phone number.
+2. Products table — contains product names, brands, categories, and prices.
+3. Orders table — keeps records of customer purchases including quantity, price, and date.
+4. Payment method table — holds payment type and transaction status.
+5. Shipping address table — records the customer’s delivery address and region.
 
 ---
 
-## ⚙️ ETL Workflow
+🧩 **Step 1: Importing Libraries**
+The process started by importing the necessary Python libraries for data manipulation.
 
-### 1. 🧩 Importing Libraries
-Essential Python libraries were imported for data manipulation and analysis:
 ```python
 import numpy as np
 import pandas as pd
-````
+```
+
+These libraries made it easy to clean, analyze, and reshape the data.
 
 ---
 
-### 2. 🏗️ Extraction Layer
-
-The raw dataset `yanki_ecommerce.csv` was loaded from the `rawdata` directory:
-
-```python
-yanki_df = pd.read_csv(r'C:\...\dataset\rawdata\yanki_ecommerce.csv')
-```
-
-Basic checks included:
-
-* `head()` to preview data
-* `info()` to inspect structure and datatypes
-* `columns` to confirm field names
+📥 **Step 2: Extraction Layer**
+The raw dataset named *yanki_ecommerce.csv* was loaded using Pandas.
+Basic checks such as `.head()`, `.info()`, and `.columns` were used to understand the structure and identify missing values or incorrect data types.
 
 ---
 
-### 3. 🧹 Transformation Layer
+🧹 **Step 3: Data Cleaning and Transformation**
+The raw data contained missing and inconsistent values, which were fixed during this stage.
 
-#### 🧾 Data Cleaning
+• Rows without an Order_ID or Customer_ID were removed because they represented incomplete transactions.
+• Missing values in the State column were also dropped for accuracy.
+• The Order_Date column was converted from text into a proper datetime format using `pd.to_datetime()` so that time-based analysis could be done correctly.
 
-* Dropped rows with missing `Order_ID` or `Customer_ID`:
-
-  ```python
-  yanki_df.dropna(subset=['Order_ID', 'Customer_ID'], inplace=True)
-  ```
-* Removed records with missing `State` values.
-* Converted the `Order_Date` column from string to datetime:
-
-  ```python
-  yanki_df['Order_Date'] = pd.to_datetime(yanki_df['Order_Date'], dayfirst=True)
-  ```
-
-#### 🧱 Table Normalization
-
-The raw data was split into **dimension** and **fact** tables to reduce redundancy:
-
-| Table                 | Description            | Key Columns                                                                      |
-| --------------------- | ---------------------- | -------------------------------------------------------------------------------- |
-| `customers_df`        | Customer info          | `Customer_ID`, `Customer_Name`, `Email`, `Phone_Number`                          |
-| `products_df`         | Product details        | `Product_ID`, `Product_Name`, `Brand`, `Category`, `Price`                       |
-| `shipping_address_df` | Customer shipping data | `Shipping_ID`, `Customer_ID`, `City`, `State`, `Country`, `Postal_Code`          |
-| `orders_df`           | Transactional data     | `Order_ID`, `Customer_ID`, `Product_ID`, `Quantity`, `Total_Price`, `Order_Date` |
-| `payment_method_df`   | Payment records        | `Order_ID`, `Payment_Method`, `Transaction_Status`                               |
-
-Each table was created using filtered column selections and `drop_duplicates()` for uniqueness:
-
-```python
-customer_df = yanki_df[['Customer_ID', 'Customer_Name', 'Email', 'Phone_Number']].copy().drop_duplicates()
-```
-
-Shipping addresses were assigned a unique index:
-
-```python
-shipping_address_df.index.name = 'Shipping_ID'
-shipping_address_df = shipping_address_df.reset_index()
-```
+After cleaning, the dataset was divided into smaller, organized tables to reduce redundancy and make future analysis easier.
 
 ---
 
-### 4. 💾 Loading Layer
+📦 **Step 4: Data Normalization**
+The dataset was normalized into separate tables, each focused on a single entity.
+Each table was created by selecting relevant columns and removing duplicates.
 
-All cleaned tables were exported as separate CSV files to the `cleandata` directory:
+• Customers_df – Customer_ID, Customer_Name, Email, Phone_Number
+• Products_df – Product_ID, Product_Name, Brand, Category, Price
+• Shipping_address_df – Shipping_ID, Customer_ID, Shipping_Address, City, State, Country, Postal_Code
+• Orders_df – Order_ID, Customer_ID, Product_ID, Quantity, Total_Price, Order_Date
+• Payment_method_df – Order_ID, Payment_Method, Transaction_Status
+
+A unique Shipping_ID index was created to serve as a primary key for the shipping table.
+
+---
+
+💾 **Step 5: Loading Layer**
+Each cleaned and normalized table was exported as a separate CSV file and saved in the “cleandata” folder.
+This step ensures the data can easily be loaded into databases or used for further analysis.
+
+Example:
 
 ```python
 customer_df.to_csv('dataset/cleandata/customers.csv', index=False)
-products_df.to_csv('dataset/cleandata/products.csv', index=False)
-orders_df.to_csv('dataset/cleandata/orders.csv', index=False)
-payment_method_df.to_csv('dataset/cleandata/payment.csv', index=False)
-shipping_address_df.to_csv('dataset/cleandata/shipping.csv', index=False)
 ```
 
----
-
-## ✅ Results
-
-After the ETL process:
-
-* The data was fully cleaned and normalized.
-* Each table has unique primary keys and defined foreign key relationships.
-* The final schema follows **third normal form (3NF)**.
-* Clean CSV files are ready for database loading or business analytics.
+All tables — customers, products, orders, payments, and shipping — were successfully saved.
 
 ---
 
-## 🧰 Tools & Technologies
+✅ **Final Outcome**
+After the ETL process, the data became fully structured and analysis-ready.
+The final version:
 
-* 🐍 **Python 3**
-* 🧮 **Pandas**, **NumPy**
-* 📓 **Jupyter Notebook**
-* 🗄️ **CSV File Storage**
-* 🧱 **Relational Data Modeling**
+* Has no missing or invalid records.
+* Uses consistent datatypes and naming.
+* Follows the third normal form (3NF).
+* Includes all relationships clearly defined through primary and foreign keys.
 
----
-
-## 🚀 Future Enhancements
-
-* Automate the ETL process using **Airflow** or **Prefect**
-* Load the final tables into a **SQL database** (e.g., PostgreSQL)
-* Build dashboards using **Power BI** or **Tableau**
-* Extend model with additional entities like inventory or suppliers
+The result is a complete, reliable dataset ready for visualization, reporting, or storage in a SQL database.
 
 ---
 
-## 📁 Project Structure
+🧰 **Tools and Technologies Used**
 
-```
-Yanki_Ecommerce_ETL/
+* Python 3
+* Pandas
+* NumPy
+* Jupyter Notebook
+* CSV files for storage
+* Relational data modeling (ER diagram)
+
+---
+
+🚀 **Future Improvements**
+
+* Automate the ETL process with Apache Airflow or Prefect.
+* Load the cleaned tables into a relational database such as PostgreSQL.
+* Create dashboards with Power BI or Tableau for business insights.
+* Expand the data model to include suppliers, inventory, and delivery tracking.
+
+---
+
+📁 **Project Structure**
+Yanki_Ecommerce_ETL
 │
-├── dataset/
-│   ├── rawdata/
-│   │   └── yanki_ecommerce.csv
-│   └── cleandata/
-│       ├── customers.csv
-│       ├── products.csv
-│       ├── orders.csv
-│       ├── payment.csv
-│       └── shipping.csv
+├── dataset
+│   ├── rawdata → contains the original yanki_ecommerce.csv file
+│   └── cleandata → contains all cleaned and normalized CSV tables
 │
-├── yanki_etl.ipynb             # Main ETL notebook
-├── Data_Model.png              # ER diagram
-└── README.md                   # Documentation (this file)
-```
+├── yanki_etl.ipynb → main notebook with ETL steps
+├── Data_Model.png → entity-relationship diagram
+└── README.txt → project documentation
 
 ---
 
-## ✨ Author
-
-**Kenneth Chizaram Mbadugha**
+✨ **Author**
+Kenneth Chizaram Mbadugha
 Data Engineer
-📧 [mbadughakenneth2021@gmail.com](mailto:mbadughakenneth2021@gmail.com)
+Email: [mbadughakenneth2021@gmail.com](mailto:mbadughakenneth2021@gmail.com)
 
-
-```
-
----
-
-Would you like me to include a **“Setup Instructions”** section (to explain how someone can rerun your ETL notebook on their computer)? It’s great for collaborators or portfolio reviewers.
-```
