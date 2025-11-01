@@ -135,7 +135,6 @@ Yanki_Ecommerce_ETL
 ---
 
 ✨ **Author**
-Kenneth Chizaram Mbadugha
-Data Engineer
-Email: [mbadughakenneth2021@gmail.com](mailto:mbadughakenneth2021@gmail.com)
-
+*Kenneth Chizaram Mbadugha
+*Data Engineer
+*Email: [mbadughakenneth2021@gmail.com](mailto:mbadughakenneth2021@gmail.com)
